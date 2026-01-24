@@ -6,7 +6,7 @@
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "27.1"))
 ;; Keywords: languages, tiddlywiki, wiki
-;; URL: https://github.com/your-repo/tiddlywiki-mode
+;; URL: https://github.com/dionisos2/tiddlywiki-mode
 
 ;;; Commentary:
 

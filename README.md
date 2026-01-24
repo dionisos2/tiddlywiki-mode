@@ -31,20 +31,11 @@ A major mode for Emacs to edit TiddlyWiki `.tid` files.
 
 ## Installation
 
-### Manual
-
-Clone this repository and add to your load path:
-
-```elisp
-(add-to-list 'load-path "/path/to/tiddlywiki-mode")
-(require 'tiddlywiki-mode)
-```
-
-### use-package
+### With straight.el and use-package
 
 ```elisp
 (use-package tiddlywiki-mode
-  :load-path "/path/to/tiddlywiki-mode"
+  :straight (:host github :repo "dionisos2/tiddlywiki-mode")
   :mode "\\.tid\\'"
   :bind (:map tiddlywiki-mode-map
          ("C-c C-o" . tiddlywiki-open-tiddler)
@@ -59,6 +50,15 @@ Clone this repository and add to your load path:
    '(("my-wiki" . "~/path/to/wiki/tiddlers")
      ("other-wiki" . "~/path/to/other/tiddlers")))
   (tiddlywiki-default-wiki "my-wiki"))
+```
+
+### Manual
+
+Clone this repository and add to your load path:
+
+```elisp
+(add-to-list 'load-path "/path/to/tiddlywiki-mode")
+(require 'tiddlywiki-mode)
 ```
 
 ## Configuration
@@ -110,7 +110,7 @@ For proper syntax highlighting and indentation inside code blocks, you can use t
 
 ```elisp
 (use-package tiddlywiki-polymode
-  :load-path "/path/to/tiddlywiki-mode"
+  :straight (:host github :repo "dionisos2/tiddlywiki-mode")
   :mode ("\\.tid\\'" . poly-tiddlywiki-mode))
 ```
 
