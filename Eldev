@@ -8,8 +8,10 @@
 ;; Test configuration
 (eldev-use-plugin 'autoloads)
 
-;; Dependencies for testing (consult is optional for main mode)
+;; Dependencies (optional features)
 (eldev-add-extra-dependencies 'test 'consult)
+(eldev-add-extra-dependencies 'test 'polymode)
+(eldev-add-extra-dependencies 'compile 'polymode)
 
 ;; Byte-compilation settings
 (setq eldev-standard-excludes

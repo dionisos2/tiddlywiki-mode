@@ -93,10 +93,40 @@ Set a default wiki:
 
 Use `C-u` prefix with navigation commands to select a different wiki.
 
+## Code Block Support (Polymode)
+
+For proper syntax highlighting and indentation inside code blocks, you can use the polymode integration:
+
+```elisp
+(use-package tiddlywiki-polymode
+  :load-path "/path/to/tiddlywiki-mode"
+  :mode ("\\.tid\\'" . poly-tiddlywiki-mode))
+```
+
+This enables:
+- Syntax highlighting using the language's major mode
+- Proper indentation inside code blocks
+- All editing features of the associated mode
+
+By default, mode hooks are **not** run in code blocks to avoid starting heavy processes like LSP. If you want full mode functionality:
+
+```elisp
+(setq tiddlywiki-code-block-run-hooks t)
+```
+
+### Language Mapping
+
+Languages are automatically mapped to modes (e.g., `python` → `python-mode`). You can customize this:
+
+```elisp
+(add-to-list 'tiddlywiki-language-mode-alist '("my-lang" . my-lang-mode))
+```
+
 ## Dependencies
 
 - Emacs 27.1 or later
 - [consult](https://github.com/minad/consult) (optional, for `tiddlywiki-grep`)
+- [polymode](https://github.com/polymode/polymode) (optional, for code block support)
 
 ## Development
 
