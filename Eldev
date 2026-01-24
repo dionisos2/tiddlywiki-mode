@@ -1,0 +1,17 @@
+; -*- mode: emacs-lisp; lexical-binding: t; -*-
+
+;; Eldev configuration for tiddlywiki-mode
+
+;; Project metadata
+(eldev-use-package-archive 'melpa)
+
+;; Test configuration
+(eldev-use-plugin 'autoloads)
+
+;; Dependencies for testing (consult is optional for main mode)
+(eldev-add-extra-dependencies 'test 'consult)
+
+;; Byte-compilation settings
+(setq eldev-standard-excludes
+      '(:or "divers.el"
+            (eldev-standard-excludes)))

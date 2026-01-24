@@ -1,0 +1,20 @@
+# Byte-compiled files
+*.elc
+
+# Eldev
+/.eldev/
+/Eldev-local
+
+# Package archives
+/*.tar
+
+# Backup files
+*~
+\#*\#
+.\#*
+
+# Auto-save files
+.saves-*
+
+# Local configuration
+.dir-locals.el
