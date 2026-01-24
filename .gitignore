@@ -1,6 +1,9 @@
 # Byte-compiled files
 *.elc
 
+# Autoloads
+*-autoloads.el
+
 # Eldev
 /.eldev/
 /Eldev-local

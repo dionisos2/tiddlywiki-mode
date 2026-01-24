@@ -12,8 +12,3 @@
 (eldev-add-extra-dependencies 'test 'consult)
 (eldev-add-extra-dependencies 'test 'polymode)
 (eldev-add-extra-dependencies 'compile 'polymode)
-
-;; Byte-compilation settings
-(setq eldev-standard-excludes
-      '(:or "divers.el"
-            (eldev-standard-excludes)))

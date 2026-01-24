@@ -139,7 +139,6 @@ without triggering heavy operations like LSP."
   :init-functions (unless tiddlywiki-code-block-run-hooks
                     '(tiddlywiki-polymode--init-code-block)))
 
-;;;###autoload
 (define-polymode poly-tiddlywiki-mode
   :hostmode 'poly-tiddlywiki-hostmode
   :innermodes '(poly-tiddlywiki-code-innermode)
