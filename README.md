@@ -54,11 +54,11 @@ Clone this repository and add to your load path:
          ("C-c C-h" . tiddlywiki-toggle-header)
          ("C-c C-t" . tiddlywiki-add-tag)
          ("C-c C-r" . tiddlywiki-remove-tag))
-  :config
-  (setq tiddlywiki-wiki-alist
-        '(("my-wiki" . "~/path/to/wiki/tiddlers")
-          ("other-wiki" . "~/path/to/other/tiddlers")))
-  (setq tiddlywiki-default-wiki "my-wiki"))
+  :custom
+  (tiddlywiki-wiki-alist
+   '(("my-wiki" . "~/path/to/wiki/tiddlers")
+     ("other-wiki" . "~/path/to/other/tiddlers")))
+  (tiddlywiki-default-wiki "my-wiki"))
 ```
 
 ## Configuration
