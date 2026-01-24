@@ -46,6 +46,14 @@ Clone this repository and add to your load path:
 (use-package tiddlywiki-mode
   :load-path "/path/to/tiddlywiki-mode"
   :mode "\\.tid\\'"
+  :bind (:map tiddlywiki-mode-map
+         ("C-c C-o" . tiddlywiki-open-tiddler)
+         ("C-c C-s" . tiddlywiki-grep)
+         ("C-c C-n" . tiddlywiki-new-tiddler)
+         ("C-c C-w" . tiddlywiki-select-wiki)
+         ("C-c C-h" . tiddlywiki-toggle-header)
+         ("C-c C-t" . tiddlywiki-add-tag)
+         ("C-c C-r" . tiddlywiki-remove-tag))
   :config
   (setq tiddlywiki-wiki-alist
         '(("my-wiki" . "~/path/to/wiki/tiddlers")
@@ -80,7 +88,9 @@ Set a default wiki:
 (setq tiddlywiki-update-modified-on-save nil)
 ```
 
-## Key Bindings
+## Suggested Key Bindings
+
+The mode does not define default keybindings. Here are the suggested bindings (included in the use-package example above):
 
 | Key       | Command                     | Description                          |
 |-----------|-----------------------------|--------------------------------------|
@@ -90,6 +100,7 @@ Set a default wiki:
 | `C-c C-w` | `tiddlywiki-select-wiki`    | Select active wiki                   |
 | `C-c C-h` | `tiddlywiki-toggle-header`  | Toggle header visibility             |
 | `C-c C-t` | `tiddlywiki-add-tag`        | Add a tag to current tiddler         |
+| `C-c C-r` | `tiddlywiki-remove-tag`     | Remove a tag from current tiddler    |
 
 Use `C-u` prefix with navigation commands to select a different wiki.
 

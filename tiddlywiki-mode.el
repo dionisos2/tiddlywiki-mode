@@ -539,14 +539,7 @@ If WIKI is nil, use the current wiki."
 ;;; ============================================================
 
 (defvar tiddlywiki-mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c C-o") #'tiddlywiki-open-tiddler)
-    (define-key map (kbd "C-c C-s") #'tiddlywiki-grep)
-    (define-key map (kbd "C-c C-n") #'tiddlywiki-new-tiddler)
-    (define-key map (kbd "C-c C-w") #'tiddlywiki-select-wiki)
-    (define-key map (kbd "C-c C-h") #'tiddlywiki-toggle-header)
-    (define-key map (kbd "C-c C-t") #'tiddlywiki-add-tag)
-    map)
+  (make-sparse-keymap)
   "Keymap for TiddlyWiki mode.")
 
 ;;; ============================================================
