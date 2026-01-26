@@ -37,16 +37,28 @@ Set to non-nil if you want full mode functionality in code blocks."
   :type 'boolean
   :group 'tiddlywiki)
 
-(defcustom tiddlywiki-code-block-hooks-whitelist nil
-  "List of hook functions that should run even when hooks are disabled.
-When `tiddlywiki-code-block-run-hooks' is nil, only functions in this
-list will be executed from mode hooks.
+(defcustom tiddlywiki-code-block-hooks-blacklist
+  '(lsp
+    lsp-deferred
+    lsp-mode
+    eglot-ensure
+    cargo-minor-mode
+    flycheck-mode
+    flymake-mode
+    company-mode
+    corfu-mode
+    yas-minor-mode
+    yas-minor-mode-on
+    tree-sitter-mode
+    tree-sitter-hl-mode
+    copilot-mode)
+  "List of hook functions that should NOT run in code blocks.
+When `tiddlywiki-code-block-run-hooks' is nil, functions in this
+list will be blocked from mode hooks. All other hooks will run normally.
 
-Example:
-  (setq tiddlywiki-code-block-hooks-whitelist
-        \\='(show-paren-mode
-          electric-pair-local-mode
-          my-custom-hook-function))"
+This is useful to prevent heavy operations like LSP from starting
+for each code block while still allowing lightweight hooks like
+`show-paren-mode' or `electric-pair-local-mode'."
   :type '(repeat function)
   :group 'tiddlywiki)
 
@@ -148,18 +160,17 @@ FALLBACK is the optional fallback mode."
 ;; delayed-mode-hooks instead of running them. We then run only
 ;; the whitelisted functions and discard the rest.
 
-(defun tiddlywiki-polymode--run-whitelisted-hooks ()
-  "Run whitelisted functions from delayed mode hooks.
-Goes through `delayed-mode-hooks', and for each hook runs only
-the functions that are in `tiddlywiki-code-block-hooks-whitelist'."
-  (when tiddlywiki-code-block-hooks-whitelist
-    (dolist (hook delayed-mode-hooks)
-      (when (boundp hook)
-        (dolist (func (symbol-value hook))
-          (when (and (functionp func)
-                     (memq func tiddlywiki-code-block-hooks-whitelist))
-            (ignore-errors
-              (funcall func))))))))
+(defun tiddlywiki-polymode--run-filtered-hooks ()
+  "Run delayed mode hooks, filtering out blacklisted functions.
+Goes through `delayed-mode-hooks', and for each hook runs all
+functions EXCEPT those in `tiddlywiki-code-block-hooks-blacklist'."
+  (dolist (hook delayed-mode-hooks)
+    (when (boundp hook)
+      (dolist (func (symbol-value hook))
+        (when (and (functionp func)
+                   (not (memq func tiddlywiki-code-block-hooks-blacklist)))
+          (ignore-errors
+            (funcall func)))))))
 
 (defun tiddlywiki-polymode--around-pm-mode-setup (orig-fun mode &optional buffer)
   "Advice around `pm--mode-setup' to inhibit hooks for tiddlywiki inner buffers.
@@ -179,10 +190,14 @@ ORIG-FUN is the original function, MODE is the mode to setup, BUFFER is optional
       ;; Inhibit hooks by using delay-mode-hooks
       (let ((delay-mode-hooks t))
         (prog1 (funcall orig-fun mode buffer)
-          ;; Run whitelisted hooks
-          (tiddlywiki-polymode--run-whitelisted-hooks)
+          ;; Run hooks except blacklisted ones
+          (tiddlywiki-polymode--run-filtered-hooks)
           ;; Clear delayed hooks
-          (setq delayed-mode-hooks nil)))
+          (setq delayed-mode-hooks nil)
+          ;; Ensure font-lock is enabled for syntax highlighting
+          (when (and (not font-lock-mode)
+                     (derived-mode-p 'prog-mode 'text-mode))
+            (font-lock-mode 1))))
     ;; Normal execution
     (funcall orig-fun mode buffer)))
 

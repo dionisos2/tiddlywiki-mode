@@ -197,9 +197,10 @@ Should be a key in `tiddlywiki-wiki-alist'."
     ("^!!\\s-*\\(.*\\)$" (0 'tiddlywiki-heading-2-face))
     ("^!\\s-*\\(.*\\)$" (0 'tiddlywiki-heading-1-face))
 
-    ;; Code blocks ```
+    ;; Code blocks ``` (only when polymode is not active)
     ("^```.*\n\\(\\(?:.*\n\\)*?\\)```"
-     (0 'tiddlywiki-code-block-face))
+     (0 (unless (bound-and-true-p polymode-mode)
+          'tiddlywiki-code-block-face)))
 
     ;; Inline code `code`
     ("`\\([^`\n]+\\)`"

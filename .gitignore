@@ -21,3 +21,5 @@
 
 # Local configuration
 .dir-locals.el
+
+utils.el

@@ -57,12 +57,14 @@ End."
 ;;; Tests
 ;;; ============================================================
 
-(ert-deftest tiddlywiki-hooks-test-python-hook-not-called ()
-  "Test that python-mode-hook is not called in code blocks."
+(ert-deftest tiddlywiki-hooks-test-python-hook-called-when-not-blacklisted ()
+  "Test that python-mode-hook IS called in code blocks when not blacklisted."
   :tags '(:polymode :hooks)
   (skip-unless (not tiddlywiki-polymode-hooks-test-skip))
   (skip-unless (fboundp 'python-mode))
   (let ((tiddlywiki-code-block-run-hooks nil)
+        ;; Our test function is NOT in the blacklist
+        (tiddlywiki-code-block-hooks-blacklist '(lsp lsp-deferred))
         (tiddlywiki-test-hook-called nil)
         (tiddlywiki-test-hook-call-count 0))
     ;; Add our test hook
@@ -76,16 +78,18 @@ End."
           (search-forward "def hello")
           ;; Force polymode to switch to inner buffer
           (pm-switch-to-buffer)
-          ;; Check if hook was called
-          (should-not tiddlywiki-test-hook-called))
+          ;; Hook SHOULD be called because it's not blacklisted
+          (should tiddlywiki-test-hook-called))
       ;; Cleanup
       (remove-hook 'python-mode-hook #'tiddlywiki-test-hook-function))))
 
-(ert-deftest tiddlywiki-hooks-test-elisp-hook-not-called ()
-  "Test that emacs-lisp-mode-hook is not called in code blocks."
+(ert-deftest tiddlywiki-hooks-test-elisp-hook-called-when-not-blacklisted ()
+  "Test that emacs-lisp-mode-hook IS called in code blocks when not blacklisted."
   :tags '(:polymode :hooks)
   (skip-unless (not tiddlywiki-polymode-hooks-test-skip))
   (let ((tiddlywiki-code-block-run-hooks nil)
+        ;; Our test function is NOT in the blacklist
+        (tiddlywiki-code-block-hooks-blacklist '(lsp lsp-deferred))
         (tiddlywiki-test-hook-called nil)
         (tiddlywiki-test-hook-call-count 0))
     ;; Add our test hook
@@ -99,8 +103,8 @@ End."
           (search-forward "(defun test")
           ;; Force polymode to switch
           (pm-switch-to-buffer)
-          ;; Check if hook was called
-          (should-not tiddlywiki-test-hook-called))
+          ;; Hook SHOULD be called because it's not blacklisted
+          (should tiddlywiki-test-hook-called))
       ;; Cleanup
       (remove-hook 'emacs-lisp-mode-hook #'tiddlywiki-test-hook-function))))
 
@@ -136,13 +140,13 @@ End."
   (should (boundp 'delay-mode-hooks))
   (should (boundp 'delayed-mode-hooks)))
 
-(ert-deftest tiddlywiki-hooks-test-whitelist ()
-  "Test that whitelisted hooks are called even when hooks are disabled."
+(ert-deftest tiddlywiki-hooks-test-blacklist ()
+  "Test that blacklisted hooks are NOT called even when they would normally run."
   :tags '(:polymode :hooks)
   (skip-unless (not tiddlywiki-polymode-hooks-test-skip))
   (skip-unless (fboundp 'python-mode))
   (let ((tiddlywiki-code-block-run-hooks nil)
-        (tiddlywiki-code-block-hooks-whitelist
+        (tiddlywiki-code-block-hooks-blacklist
          (list #'tiddlywiki-test-hook-function))
         (tiddlywiki-test-hook-called nil)
         (tiddlywiki-test-hook-call-count 0))
@@ -157,7 +161,33 @@ End."
           (search-forward "def hello")
           ;; Force polymode to switch
           (pm-switch-to-buffer)
-          ;; Hook SHOULD be called because it's whitelisted
+          ;; Hook should NOT be called because it's blacklisted
+          (should-not tiddlywiki-test-hook-called))
+      ;; Cleanup
+      (remove-hook 'python-mode-hook #'tiddlywiki-test-hook-function))))
+
+(ert-deftest tiddlywiki-hooks-test-non-blacklisted-hooks-run ()
+  "Test that non-blacklisted hooks ARE called when hooks filtering is active."
+  :tags '(:polymode :hooks)
+  (skip-unless (not tiddlywiki-polymode-hooks-test-skip))
+  (skip-unless (fboundp 'python-mode))
+  (let ((tiddlywiki-code-block-run-hooks nil)
+        ;; Empty blacklist - all hooks should run
+        (tiddlywiki-code-block-hooks-blacklist nil)
+        (tiddlywiki-test-hook-called nil)
+        (tiddlywiki-test-hook-call-count 0))
+    ;; Add our test hook
+    (add-hook 'python-mode-hook #'tiddlywiki-test-hook-function)
+    (unwind-protect
+        (with-temp-buffer
+          (insert tiddlywiki-hooks-test-content)
+          (poly-tiddlywiki-mode)
+          ;; Move into the python code block
+          (goto-char (point-min))
+          (search-forward "def hello")
+          ;; Force polymode to switch
+          (pm-switch-to-buffer)
+          ;; Hook SHOULD be called because blacklist is empty
           (should tiddlywiki-test-hook-called))
       ;; Cleanup
       (remove-hook 'python-mode-hook #'tiddlywiki-test-hook-function))))
