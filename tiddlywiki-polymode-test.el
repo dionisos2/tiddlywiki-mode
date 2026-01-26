@@ -181,6 +181,13 @@ code without language
   (skip-unless (not tiddlywiki-polymode-test-skip))
   (should (eq tiddlywiki-code-block-run-hooks nil)))
 
+(ert-deftest tiddlywiki-polymode-test-get-mode-symbol-nil ()
+  "Test that nil/empty language names are handled."
+  :tags '(:polymode)
+  (skip-unless (not tiddlywiki-polymode-test-skip))
+  (should (null (tiddlywiki-polymode--get-mode-symbol nil)))
+  (should (null (tiddlywiki-polymode--get-mode-symbol ""))))
+
 (provide 'tiddlywiki-polymode-test)
 
 ;;; tiddlywiki-polymode-test.el ends here

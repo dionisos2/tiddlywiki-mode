@@ -97,28 +97,79 @@ after ``` in code blocks and MODE is the corresponding major mode."
   :group 'tiddlywiki)
 
 ;;; ============================================================
-;;; Polymode Initialization Functions
+;;; Language Resolution
 ;;; ============================================================
 
-(defun tiddlywiki-polymode--init-code-block (&optional _type)
-  "Initialize a code block without running mode hooks.
-TYPE is the span type (passed by polymode, ignored here).
-This function sets up syntax highlighting and indentation
-without triggering heavy operations like LSP."
-  (setq-local delay-mode-hooks (not tiddlywiki-code-block-run-hooks))
-  ;; Font-lock is set up by the mode itself
-  (font-lock-mode 1)
-  ;; Ensure proper indentation function is available
-  (when (local-variable-p 'indent-line-function)
-    (setq-local indent-line-function indent-line-function)))
-
 (defun tiddlywiki-polymode--get-mode-symbol (name)
-  "Get mode symbol for language NAME using `tiddlywiki-language-mode-alist'."
-  (or (cdr (assoc (downcase name) tiddlywiki-language-mode-alist))
-      (let ((mode-sym (intern (concat (downcase name) "-mode"))))
-        (if (fboundp mode-sym)
-            mode-sym
-          nil))))
+  "Get mode symbol for language NAME using `tiddlywiki-language-mode-alist'.
+Returns nil if no mode is found."
+  (when (and name (stringp name) (> (length name) 0))
+    (or (cdr (assoc (downcase name) tiddlywiki-language-mode-alist))
+        (let ((mode-sym (intern (concat (downcase name) "-mode"))))
+          (when (fboundp mode-sym)
+            mode-sym)))))
+
+;; Advice to use our custom language-to-mode mapping
+(defun tiddlywiki-polymode--around-get-mode-symbol (orig-fun name &optional fallback)
+  "Advice for `pm-get-mode-symbol-from-name' to use our language alist.
+ORIG-FUN is the original function, NAME is the language name,
+FALLBACK is the optional fallback mode."
+  (if (and name (stringp name) (> (length name) 0))
+      (or (tiddlywiki-polymode--get-mode-symbol name)
+          (funcall orig-fun name fallback))
+    ;; If name is nil or empty, return fallback or default
+    (or fallback tiddlywiki-code-block-default-mode)))
+
+(advice-add 'pm-get-mode-symbol-from-name
+            :around #'tiddlywiki-polymode--around-get-mode-symbol)
+
+;;; ============================================================
+;;; Hook Management - Disable mode hooks in inner buffers
+;;; ============================================================
+
+;; We use Emacs's built-in delay-mode-hooks mechanism to prevent
+;; mode hooks from running in polymode inner buffers.
+;; When delay-mode-hooks is t, run-mode-hooks stores hooks in
+;; delayed-mode-hooks instead of running them. We then clear
+;; delayed-mode-hooks to discard them.
+
+(defvar tiddlywiki-polymode--inhibit-hooks nil
+  "When non-nil, mode hooks should be inhibited.")
+
+(defun tiddlywiki-polymode--is-tiddlywiki-inner-buffer-p ()
+  "Return non-nil if this is a tiddlywiki polymode inner buffer."
+  (and (buffer-base-buffer)  ; We're in an indirect buffer
+       (boundp 'pm/polymode)
+       pm/polymode
+       (let ((hostmode (ignore-errors (eieio-oref pm/polymode 'hostmode))))
+         (and hostmode
+              (eq (ignore-errors (eieio-oref hostmode 'mode))
+                  'tiddlywiki-mode)))))
+
+(defun tiddlywiki-polymode--around-pm-mode-setup (orig-fun mode &optional buffer)
+  "Advice around `pm--mode-setup' to inhibit hooks for tiddlywiki inner buffers.
+ORIG-FUN is the original function, MODE is the mode to setup, BUFFER is optional."
+  (if (and (not tiddlywiki-code-block-run-hooks)
+           ;; Check if we're setting up an inner buffer (indirect buffer)
+           (buffer-base-buffer (or buffer (current-buffer)))
+           ;; Check if base buffer uses tiddlywiki-mode
+           (with-current-buffer (buffer-base-buffer (or buffer (current-buffer)))
+             (or (eq major-mode 'tiddlywiki-mode)
+                 (and (boundp 'polymode-mode) polymode-mode
+                      (boundp 'pm/polymode) pm/polymode
+                      (let ((hostmode (ignore-errors (eieio-oref pm/polymode 'hostmode))))
+                        (and hostmode
+                             (eq (ignore-errors (eieio-oref hostmode 'mode))
+                                 'tiddlywiki-mode)))))))
+      ;; Inhibit hooks by using delay-mode-hooks
+      (let ((delay-mode-hooks t))
+        (prog1 (funcall orig-fun mode buffer)
+          ;; Clear delayed hooks so they never run
+          (setq delayed-mode-hooks nil)))
+    ;; Normal execution
+    (funcall orig-fun mode buffer)))
+
+(advice-add 'pm--mode-setup :around #'tiddlywiki-polymode--around-pm-mode-setup)
 
 ;;; ============================================================
 ;;; Polymode Definitions
@@ -128,29 +179,16 @@ without triggering heavy operations like LSP."
   :mode 'tiddlywiki-mode)
 
 (define-auto-innermode poly-tiddlywiki-code-innermode
-  :head-matcher "^```\\([a-zA-Z0-9_+-]+\\)?$"
+  :head-matcher "^```\\([a-zA-Z0-9_+-]*\\)$"
   :tail-matcher "^```$"
   :mode-matcher (cons "^```\\([a-zA-Z0-9_+-]+\\)$" 1)
   :head-mode 'host
   :tail-mode 'host
-  :fallback-mode 'prog-mode
-  :init-functions '(tiddlywiki-polymode--init-code-block))
-
-;; Advice to use our custom language-to-mode mapping
-(defun tiddlywiki-polymode--around-get-mode-symbol (orig-fun name &optional fallback)
-  "Advice for `pm-get-mode-symbol-from-name' to use our language alist.
-ORIG-FUN is the original function, NAME is the language name,
-FALLBACK is the optional fallback mode."
-  (or (tiddlywiki-polymode--get-mode-symbol name)
-      (funcall orig-fun name fallback)))
-
-(advice-add 'pm-get-mode-symbol-from-name
-            :around #'tiddlywiki-polymode--around-get-mode-symbol)
+  :fallback-mode 'prog-mode)
 
 (define-polymode poly-tiddlywiki-mode
   :hostmode 'poly-tiddlywiki-hostmode
-  :innermodes '(poly-tiddlywiki-code-innermode)
-  (setq-local polymode-run-mode-hooks tiddlywiki-code-block-run-hooks))
+  :innermodes '(poly-tiddlywiki-code-innermode))
 
 (provide 'tiddlywiki-polymode)
 
