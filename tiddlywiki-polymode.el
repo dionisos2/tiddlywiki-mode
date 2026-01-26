@@ -211,9 +211,9 @@ ORIG-FUN is the original function, MODE is the mode to setup, BUFFER is optional
   :mode 'tiddlywiki-mode)
 
 (define-auto-innermode poly-tiddlywiki-code-innermode
-  :head-matcher "^```\\([a-zA-Z0-9_+-]*\\)$"
-  :tail-matcher "^```$"
-  :mode-matcher (cons "^```\\([a-zA-Z0-9_+-]+\\)$" 1)
+  :head-matcher "^```\\([a-zA-Z0-9_+-]+\\)[ \t]*$"
+  :tail-matcher "^```[ \t]*$"
+  :mode-matcher (cons "^```\\([a-zA-Z0-9_+-]+\\)" 1)
   :head-mode 'host
   :tail-mode 'host
   :fallback-mode 'prog-mode)

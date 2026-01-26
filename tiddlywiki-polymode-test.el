@@ -188,6 +188,116 @@ code without language
   (should (null (tiddlywiki-polymode--get-mode-symbol nil)))
   (should (null (tiddlywiki-polymode--get-mode-symbol ""))))
 
+;;; ============================================================
+;;; Code Block Boundary Tests
+;;; ============================================================
+
+(defconst tiddlywiki-polymode-test-boundaries
+  "title: Test
+
+Text before first block.
+
+```python
+def foo():
+    pass
+```
+
+Text between blocks.
+
+```javascript
+function bar() {}
+```
+
+Text after all blocks.
+"
+  "Sample content for testing code block boundaries.")
+
+(ert-deftest tiddlywiki-polymode-test-boundary-before-first-block ()
+  "Test that text before first code block is in host mode."
+  :tags '(:polymode :boundaries)
+  (skip-unless (not tiddlywiki-polymode-test-skip))
+  (with-temp-buffer
+    (insert tiddlywiki-polymode-test-boundaries)
+    (poly-tiddlywiki-mode)
+    (goto-char (point-min))
+    (search-forward "Text before")
+    (let ((span (pm-innermost-span)))
+      (should span)
+      ;; nil type means host mode
+      (should (null (car span))))))
+
+(ert-deftest tiddlywiki-polymode-test-boundary-inside-first-block ()
+  "Test that code inside first block is in inner mode."
+  :tags '(:polymode :boundaries)
+  (skip-unless (not tiddlywiki-polymode-test-skip))
+  (skip-unless (fboundp 'python-mode))
+  (with-temp-buffer
+    (insert tiddlywiki-polymode-test-boundaries)
+    (poly-tiddlywiki-mode)
+    (goto-char (point-min))
+    (search-forward "def foo")
+    (let ((span (pm-innermost-span)))
+      (should span)
+      ;; non-nil type (body) means inner mode
+      (should (car span)))))
+
+(ert-deftest tiddlywiki-polymode-test-boundary-between-blocks ()
+  "Test that text between code blocks is in host mode."
+  :tags '(:polymode :boundaries)
+  (skip-unless (not tiddlywiki-polymode-test-skip))
+  (with-temp-buffer
+    (insert tiddlywiki-polymode-test-boundaries)
+    (poly-tiddlywiki-mode)
+    (goto-char (point-min))
+    (search-forward "Text between")
+    (let ((span (pm-innermost-span)))
+      (should span)
+      ;; nil type means host mode
+      (should (null (car span))))))
+
+(ert-deftest tiddlywiki-polymode-test-boundary-inside-second-block ()
+  "Test that code inside second block is in inner mode."
+  :tags '(:polymode :boundaries)
+  (skip-unless (not tiddlywiki-polymode-test-skip))
+  (with-temp-buffer
+    (insert tiddlywiki-polymode-test-boundaries)
+    (poly-tiddlywiki-mode)
+    (goto-char (point-min))
+    (search-forward "function bar")
+    (let ((span (pm-innermost-span)))
+      (should span)
+      ;; non-nil type (body) means inner mode
+      (should (car span)))))
+
+(ert-deftest tiddlywiki-polymode-test-boundary-after-all-blocks ()
+  "Test that text after all code blocks is in host mode."
+  :tags '(:polymode :boundaries)
+  (skip-unless (not tiddlywiki-polymode-test-skip))
+  (with-temp-buffer
+    (insert tiddlywiki-polymode-test-boundaries)
+    (poly-tiddlywiki-mode)
+    (goto-char (point-min))
+    (search-forward "Text after all")
+    (let ((span (pm-innermost-span)))
+      (should span)
+      ;; nil type means host mode
+      (should (null (car span))))))
+
+(ert-deftest tiddlywiki-polymode-test-boundary-no-lang-block-is-host ()
+  "Test that code blocks without language stay in host mode."
+  :tags '(:polymode :boundaries)
+  (skip-unless (not tiddlywiki-polymode-test-skip))
+  (with-temp-buffer
+    (insert tiddlywiki-polymode-test-no-lang)
+    (poly-tiddlywiki-mode)
+    (goto-char (point-min))
+    (search-forward "code without")
+    (let ((span (pm-innermost-span)))
+      (should span)
+      ;; Code blocks without language should be in host mode
+      ;; because head-matcher requires a language
+      (should (null (car span))))))
+
 (provide 'tiddlywiki-polymode-test)
 
 ;;; tiddlywiki-polymode-test.el ends here
