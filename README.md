@@ -119,7 +119,28 @@ This enables:
 - Proper indentation inside code blocks
 - All editing features of the associated mode
 
-By default, mode hooks are **not** run in code blocks to avoid starting heavy processes like LSP. If you want full mode functionality:
+**Note:** Code blocks must specify a language (e.g., ` ```python `) to activate the inner mode. Blocks without a language specifier will use the host mode's highlighting.
+
+### Hook Filtering
+
+By default, heavy mode hooks (LSP, eglot, flycheck, etc.) are filtered out to avoid starting heavy processes for each code block. Lightweight hooks (show-paren-mode, electric-pair-mode, etc.) run normally.
+
+The default blacklist includes:
+- `lsp`, `lsp-deferred`, `lsp-mode`
+- `eglot-ensure`
+- `flycheck-mode`, `flymake-mode`
+- `company-mode`, `corfu-mode`
+- `tree-sitter-mode`, `copilot-mode`
+- And others
+
+You can customize the blacklist:
+
+```elisp
+(setq tiddlywiki-code-block-hooks-blacklist
+      '(lsp lsp-deferred eglot-ensure my-heavy-hook))
+```
+
+To run ALL hooks (including LSP), disable hook filtering entirely:
 
 ```elisp
 (setq tiddlywiki-code-block-run-hooks t)
