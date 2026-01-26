@@ -136,6 +136,32 @@ End."
   (should (boundp 'delay-mode-hooks))
   (should (boundp 'delayed-mode-hooks)))
 
+(ert-deftest tiddlywiki-hooks-test-whitelist ()
+  "Test that whitelisted hooks are called even when hooks are disabled."
+  :tags '(:polymode :hooks)
+  (skip-unless (not tiddlywiki-polymode-hooks-test-skip))
+  (skip-unless (fboundp 'python-mode))
+  (let ((tiddlywiki-code-block-run-hooks nil)
+        (tiddlywiki-code-block-hooks-whitelist
+         (list #'tiddlywiki-test-hook-function))
+        (tiddlywiki-test-hook-called nil)
+        (tiddlywiki-test-hook-call-count 0))
+    ;; Add our test hook
+    (add-hook 'python-mode-hook #'tiddlywiki-test-hook-function)
+    (unwind-protect
+        (with-temp-buffer
+          (insert tiddlywiki-hooks-test-content)
+          (poly-tiddlywiki-mode)
+          ;; Move into the python code block
+          (goto-char (point-min))
+          (search-forward "def hello")
+          ;; Force polymode to switch
+          (pm-switch-to-buffer)
+          ;; Hook SHOULD be called because it's whitelisted
+          (should tiddlywiki-test-hook-called))
+      ;; Cleanup
+      (remove-hook 'python-mode-hook #'tiddlywiki-test-hook-function))))
+
 ;;; ============================================================
 ;;; Debug Tests - Check what's happening
 ;;; ============================================================

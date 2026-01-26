@@ -37,6 +37,19 @@ Set to non-nil if you want full mode functionality in code blocks."
   :type 'boolean
   :group 'tiddlywiki)
 
+(defcustom tiddlywiki-code-block-hooks-whitelist nil
+  "List of hook functions that should run even when hooks are disabled.
+When `tiddlywiki-code-block-run-hooks' is nil, only functions in this
+list will be executed from mode hooks.
+
+Example:
+  (setq tiddlywiki-code-block-hooks-whitelist
+        \\='(show-paren-mode
+          electric-pair-local-mode
+          my-custom-hook-function))"
+  :type '(repeat function)
+  :group 'tiddlywiki)
+
 (defcustom tiddlywiki-code-block-default-mode 'prog-mode
   "Default mode for code blocks without a specified language."
   :type 'symbol
@@ -129,22 +142,24 @@ FALLBACK is the optional fallback mode."
 
 ;; We use Emacs's built-in delay-mode-hooks mechanism to prevent
 ;; mode hooks from running in polymode inner buffers.
+;; We use Emacs's built-in delay-mode-hooks mechanism to prevent
+;; mode hooks from running in polymode inner buffers.
 ;; When delay-mode-hooks is t, run-mode-hooks stores hooks in
-;; delayed-mode-hooks instead of running them. We then clear
-;; delayed-mode-hooks to discard them.
+;; delayed-mode-hooks instead of running them. We then run only
+;; the whitelisted functions and discard the rest.
 
-(defvar tiddlywiki-polymode--inhibit-hooks nil
-  "When non-nil, mode hooks should be inhibited.")
-
-(defun tiddlywiki-polymode--is-tiddlywiki-inner-buffer-p ()
-  "Return non-nil if this is a tiddlywiki polymode inner buffer."
-  (and (buffer-base-buffer)  ; We're in an indirect buffer
-       (boundp 'pm/polymode)
-       pm/polymode
-       (let ((hostmode (ignore-errors (eieio-oref pm/polymode 'hostmode))))
-         (and hostmode
-              (eq (ignore-errors (eieio-oref hostmode 'mode))
-                  'tiddlywiki-mode)))))
+(defun tiddlywiki-polymode--run-whitelisted-hooks ()
+  "Run whitelisted functions from delayed mode hooks.
+Goes through `delayed-mode-hooks', and for each hook runs only
+the functions that are in `tiddlywiki-code-block-hooks-whitelist'."
+  (when tiddlywiki-code-block-hooks-whitelist
+    (dolist (hook delayed-mode-hooks)
+      (when (boundp hook)
+        (dolist (func (symbol-value hook))
+          (when (and (functionp func)
+                     (memq func tiddlywiki-code-block-hooks-whitelist))
+            (ignore-errors
+              (funcall func))))))))
 
 (defun tiddlywiki-polymode--around-pm-mode-setup (orig-fun mode &optional buffer)
   "Advice around `pm--mode-setup' to inhibit hooks for tiddlywiki inner buffers.
@@ -164,7 +179,9 @@ ORIG-FUN is the original function, MODE is the mode to setup, BUFFER is optional
       ;; Inhibit hooks by using delay-mode-hooks
       (let ((delay-mode-hooks t))
         (prog1 (funcall orig-fun mode buffer)
-          ;; Clear delayed hooks so they never run
+          ;; Run whitelisted hooks
+          (tiddlywiki-polymode--run-whitelisted-hooks)
+          ;; Clear delayed hooks
           (setq delayed-mode-hooks nil)))
     ;; Normal execution
     (funcall orig-fun mode buffer)))
