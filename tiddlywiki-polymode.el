@@ -190,6 +190,18 @@ ORIG-FUN is the original function, MODE is the mode to setup, BUFFER is optional
   :hostmode 'poly-tiddlywiki-hostmode
   :innermodes '(poly-tiddlywiki-code-innermode))
 
+;;; ============================================================
+;;; Unload Function
+;;; ============================================================
+
+(defun tiddlywiki-polymode-unload-function ()
+  "Unload function for tiddlywiki-polymode.
+Removes advices added by this package."
+  (advice-remove 'pm--mode-setup #'tiddlywiki-polymode--around-pm-mode-setup)
+  (advice-remove 'pm-get-mode-symbol-from-name #'tiddlywiki-polymode--around-get-mode-symbol)
+  ;; Return nil to indicate success
+  nil)
+
 (provide 'tiddlywiki-polymode)
 
 ;;; tiddlywiki-polymode.el ends here
