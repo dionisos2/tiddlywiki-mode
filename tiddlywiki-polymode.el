@@ -30,7 +30,7 @@
   "If non-nil, run mode hooks in code blocks.
 When nil (the default), code blocks use lightweight initialization
 that provides syntax highlighting and indentation without running
-mode hooks. This prevents heavy operations like LSP from starting
+mode hooks.  This prevents heavy operations like LSP from starting
 for each code block.
 
 Set to non-nil if you want full mode functionality in code blocks."
@@ -54,7 +54,7 @@ Set to non-nil if you want full mode functionality in code blocks."
     copilot-mode)
   "List of hook functions that should NOT run in code blocks.
 When `tiddlywiki-code-block-run-hooks' is nil, functions in this
-list will be blocked from mode hooks. All other hooks will run normally.
+list will be blocked from mode hooks.  All other hooks will run normally.
 
 This is useful to prevent heavy operations like LSP from starting
 for each code block while still allowing lightweight hooks like
@@ -85,6 +85,7 @@ for each code block while still allowing lightweight hooks like
     ("go" . go-mode)
     ("c" . c-mode)
     ("cpp" . c++-mode)
+    ;; relint suppression: Repetition
     ("c++" . c++-mode)
     ("java" . java-mode)
     ("html" . html-mode)
@@ -188,16 +189,21 @@ ORIG-FUN is the original function, MODE is the mode to setup, BUFFER is optional
                              (eq (ignore-errors (eieio-oref hostmode 'mode))
                                  'tiddlywiki-mode)))))))
       ;; Inhibit hooks by using delay-mode-hooks
-      (let ((delay-mode-hooks t))
-        (prog1 (funcall orig-fun mode buffer)
-          ;; Run hooks except blacklisted ones
-          (tiddlywiki-polymode--run-filtered-hooks)
-          ;; Clear delayed hooks
-          (setq delayed-mode-hooks nil)
-          ;; Ensure font-lock is enabled for syntax highlighting
-          (when (and (not font-lock-mode)
-                     (derived-mode-p 'prog-mode 'text-mode))
-            (font-lock-mode 1))))
+      ;; We use setq-default to modify the global value, avoiding the
+      ;; "buffer-local while locally let-bound" warning that occurs with let
+      (let ((old-delay-mode-hooks (default-value 'delay-mode-hooks)))
+        (setq-default delay-mode-hooks t)
+        (unwind-protect
+            (prog1 (funcall orig-fun mode buffer)
+              ;; Run hooks except blacklisted ones
+              (tiddlywiki-polymode--run-filtered-hooks)
+              ;; Clear delayed hooks
+              (setq delayed-mode-hooks nil)
+              ;; Ensure font-lock is enabled for syntax highlighting
+              (when (and (not font-lock-mode)
+                         (derived-mode-p 'prog-mode 'text-mode))
+                (font-lock-mode 1)))
+          (setq-default delay-mode-hooks old-delay-mode-hooks)))
     ;; Normal execution
     (funcall orig-fun mode buffer)))
 

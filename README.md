@@ -110,8 +110,9 @@ For proper syntax highlighting and indentation inside code blocks, you can use t
 
 ```elisp
 (use-package tiddlywiki-polymode
-  :straight (:host github :repo "dionisos2/tiddlywiki-mode")
-  :mode ("\\.tid\\'" . poly-tiddlywiki-mode))
+	:demand
+	:straight nil
+	:mode ("\\.tid\\'" . poly-tiddlywiki-mode))
 ```
 
 This enables:

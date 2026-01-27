@@ -306,7 +306,7 @@ Returns nil if no header is found."
         (point)))))
 
 (defun tiddlywiki-content-start-position ()
-  "Return the position where content starts (after header and blank line)."
+  "Return the position where content start (after header and blank line)."
   (save-excursion
     (save-restriction
       (widen)
@@ -408,7 +408,7 @@ is non-nil."
   "Select a wiki from `tiddlywiki-wiki-alist'."
   (interactive)
   (if (null tiddlywiki-wiki-alist)
-      (user-error "No wikis configured. Set `tiddlywiki-wiki-alist' first")
+      (user-error "No wikis configured.  Set `tiddlywiki-wiki-alist' first")
     (let ((wiki-name (completing-read "Select wiki: "
                                       (mapcar #'car tiddlywiki-wiki-alist)
                                       nil t nil nil
@@ -447,7 +447,7 @@ If WIKI is nil, use the current wiki."
          (path (if wiki-name
                    (tiddlywiki-wiki-path wiki-name)
                  (tiddlywiki-current-wiki-path))))
-    (directory-files path t "^[^.$].*\\.tid$")))
+    (directory-files path t "\\`[^.$].*\\.tid\\'")))
 
 (defun tiddlywiki-open-tiddler (&optional wiki)
   "Open a tiddler from WIKI using completion.
