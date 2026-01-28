@@ -1,4 +1,4 @@
-;;; tiddlywiki-polymode-hooks-test.el --- Tests for hook behavior -*- lexical-binding: t; -*-
+;;; poly-tiddlywiki-hooks-test.el --- Tests for hook behavior -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 
@@ -13,7 +13,7 @@
   "Non-nil if tests should be skipped.")
 
 (when (not tiddlywiki-polymode-hooks-test-skip)
-  (require 'tiddlywiki-polymode))
+  (require 'poly-tiddlywiki))
 
 ;;; ============================================================
 ;;; Test Fixtures
@@ -236,6 +236,6 @@ End."
     (message "pm-get-mode-symbol-from-name nil => %s" result)
     (should result)))
 
-(provide 'tiddlywiki-polymode-hooks-test)
+(provide 'poly-tiddlywiki-hooks-test)
 
-;;; tiddlywiki-polymode-hooks-test.el ends here
+;;; poly-tiddlywiki-hooks-test.el ends here

@@ -51,7 +51,7 @@ A major mode for Emacs to edit TiddlyWiki `.tid` files.
      ("other-wiki" . "~/path/to/other/tiddlers")))
   (tiddlywiki-default-wiki "my-wiki"))
 
-(use-package tiddlywiki-polymode
+(use-package poly-tiddlywiki
 	:demand
 	:straight nil
 	:mode ("\\.tid\\'" . poly-tiddlywiki-mode))
@@ -114,7 +114,7 @@ Use `C-u` prefix with navigation commands to select a different wiki.
 For proper syntax highlighting and indentation inside code blocks, you can use the polymode integration:
 
 ```elisp
-(use-package tiddlywiki-polymode
+(use-package poly-tiddlywiki
 	:demand
 	:straight nil
 	:mode ("\\.tid\\'" . poly-tiddlywiki-mode))

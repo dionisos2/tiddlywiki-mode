@@ -1,4 +1,4 @@
-;;; tiddlywiki-polymode.el --- Polymode support for TiddlyWiki -*- lexical-binding: t; -*-
+;;; poly-tiddlywiki.el --- Polymode support for TiddlyWiki -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2026
 
@@ -11,7 +11,7 @@
 ;; proper syntax highlighting and indentation for code blocks.
 ;;
 ;; To use, add to your config:
-;;   (require 'tiddlywiki-polymode)
+;;   (require 'poly-tiddlywiki)
 ;;
 ;; Then use `poly-tiddlywiki-mode' instead of `tiddlywiki-mode'.
 ;; You can set this automatically:
@@ -240,6 +240,6 @@ Removes advices added by this package."
   ;; Return nil to indicate success
   nil)
 
-(provide 'tiddlywiki-polymode)
+(provide 'poly-tiddlywiki)
 
-;;; tiddlywiki-polymode.el ends here
+;;; poly-tiddlywiki.el ends here

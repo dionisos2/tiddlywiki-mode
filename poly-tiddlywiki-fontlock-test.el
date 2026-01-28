@@ -1,4 +1,4 @@
-;;; tiddlywiki-polymode-fontlock-test.el --- Tests for syntax highlighting -*- lexical-binding: t; -*-
+;;; poly-tiddlywiki-fontlock-test.el --- Tests for syntax highlighting -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 
@@ -12,7 +12,7 @@
   "Non-nil if tests should be skipped.")
 
 (when (not tiddlywiki-fontlock-test-skip)
-  (require 'tiddlywiki-polymode))
+  (require 'poly-tiddlywiki))
 
 ;;; ============================================================
 ;;; Test Fixtures
@@ -231,6 +231,6 @@ def hello():
           (should face)
           (message "Face for 'defun': %S" face))))))
 
-(provide 'tiddlywiki-polymode-fontlock-test)
+(provide 'poly-tiddlywiki-fontlock-test)
 
-;;; tiddlywiki-polymode-fontlock-test.el ends here
+;;; poly-tiddlywiki-fontlock-test.el ends here

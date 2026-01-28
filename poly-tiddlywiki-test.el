@@ -1,4 +1,4 @@
-;;; tiddlywiki-polymode-test.el --- Tests for tiddlywiki-polymode -*- lexical-binding: t; -*-
+;;; poly-tiddlywiki-test.el --- Tests for poly-tiddlywiki -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 
@@ -14,7 +14,7 @@
   "Non-nil if polymode tests should be skipped.")
 
 (when (not tiddlywiki-polymode-test-skip)
-  (require 'tiddlywiki-polymode))
+  (require 'poly-tiddlywiki))
 
 ;;; ============================================================
 ;;; Test Fixtures
@@ -298,6 +298,6 @@ Text after all blocks.
       ;; because head-matcher requires a language
       (should (null (car span))))))
 
-(provide 'tiddlywiki-polymode-test)
+(provide 'poly-tiddlywiki-test)
 
-;;; tiddlywiki-polymode-test.el ends here
+;;; poly-tiddlywiki-test.el ends here
