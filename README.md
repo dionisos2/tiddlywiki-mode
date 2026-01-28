@@ -38,18 +38,23 @@ A major mode for Emacs to edit TiddlyWiki `.tid` files.
   :straight (:host github :repo "dionisos2/tiddlywiki-mode")
   :mode "\\.tid\\'"
   :bind (:map tiddlywiki-mode-map
-         ("C-c C-o" . tiddlywiki-open-tiddler)
-         ("C-c C-s" . tiddlywiki-grep)
-         ("C-c C-n" . tiddlywiki-new-tiddler)
-         ("C-c C-w" . tiddlywiki-select-wiki)
-         ("C-c C-h" . tiddlywiki-toggle-header)
-         ("C-c C-t" . tiddlywiki-add-tag)
-         ("C-c C-r" . tiddlywiki-remove-tag))
+         ("C-p C-p C-o" . tiddlywiki-open-tiddler)
+         ("C-p C-p C-s" . tiddlywiki-grep)
+         ("C-p C-p C-n" . tiddlywiki-new-tiddler)
+         ("C-p C-p C-w" . tiddlywiki-select-wiki)
+         ("C-p C-p C-h" . tiddlywiki-toggle-header)
+         ("C-p C-p C-t" . tiddlywiki-add-tag)
+         ("C-p C-p C-r" . tiddlywiki-remove-tag))
   :custom
   (tiddlywiki-wiki-alist
    '(("my-wiki" . "~/path/to/wiki/tiddlers")
      ("other-wiki" . "~/path/to/other/tiddlers")))
   (tiddlywiki-default-wiki "my-wiki"))
+
+(use-package tiddlywiki-polymode
+	:demand
+	:straight nil
+	:mode ("\\.tid\\'" . poly-tiddlywiki-mode))
 ```
 
 ### Manual
@@ -92,15 +97,15 @@ Set a default wiki:
 
 The mode does not define default keybindings. Here are the suggested bindings (included in the use-package example above):
 
-| Key       | Command                     | Description                          |
-|-----------|-----------------------------|--------------------------------------|
-| `C-c C-o` | `tiddlywiki-open-tiddler`   | Open a tiddler with completion       |
-| `C-c C-s` | `tiddlywiki-grep`           | Search in tiddlers (requires consult)|
-| `C-c C-n` | `tiddlywiki-new-tiddler`    | Create a new tiddler                 |
-| `C-c C-w` | `tiddlywiki-select-wiki`    | Select active wiki                   |
-| `C-c C-h` | `tiddlywiki-toggle-header`  | Toggle header visibility             |
-| `C-c C-t` | `tiddlywiki-add-tag`        | Add a tag to current tiddler         |
-| `C-c C-r` | `tiddlywiki-remove-tag`     | Remove a tag from current tiddler    |
+| Key           | Command                     | Description                          |
+|---------------|-----------------------------|--------------------------------------|
+| `C-p C-p C-o` | `tiddlywiki-open-tiddler`   | Open a tiddler with completion       |
+| `C-p C-p C-s` | `tiddlywiki-grep`           | Search in tiddlers (requires consult)|
+| `C-p C-p C-n` | `tiddlywiki-new-tiddler`    | Create a new tiddler                 |
+| `C-p C-p C-w` | `tiddlywiki-select-wiki`    | Select active wiki                   |
+| `C-p C-p C-h` | `tiddlywiki-toggle-header`  | Toggle header visibility             |
+| `C-p C-p C-t` | `tiddlywiki-add-tag`        | Add a tag to current tiddler         |
+| `C-p C-p C-r` | `tiddlywiki-remove-tag`     | Remove a tag from current tiddler    |
 
 Use `C-u` prefix with navigation commands to select a different wiki.
 
