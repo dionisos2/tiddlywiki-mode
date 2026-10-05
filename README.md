@@ -93,6 +93,12 @@ Set a default wiki:
 (setq tiddlywiki-update-modified-on-save nil)
 ```
 
+### Final newline handling
+
+By default, the mode never adds a final newline. You can change this mode-specific option with:
+
+`M-x customize-variable RET tiddlywiki-require-final-newline`
+
 ## Suggested Key Bindings
 
 The mode does not define default keybindings. Here are the suggested bindings (included in the use-package example above):

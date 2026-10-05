@@ -51,6 +51,39 @@ Should be a key in `tiddlywiki-wiki-alist'."
   :type 'boolean
   :group 'tiddlywiki)
 
+(defun tiddlywiki--require-final-newline-type ()
+  "Return the `:type' for `tiddlywiki-require-final-newline'.
+Reuse the options of `require-final-newline' itself so their tags
+stay in sync with Emacs, minus its nil choice, which here means
+inherit from `text-mode'."
+  `(choice
+    (const :tag "Inherit from parent mode" nil)
+    (const :tag "Use global require-final-newline setting" global)
+    (const :tag "Don't add newlines" never)
+    ,@(cl-remove-if
+       (lambda (opt)
+         ;; Drop the "Don't add newlines" const; its value is the
+         ;; last element of the widget spec.
+         (and (eq (car opt) 'const) (null (car (last opt)))))
+       (cdr (get 'require-final-newline 'custom-type)))))
+
+;;;###autoload
+(defcustom tiddlywiki-require-final-newline 'never
+  "Whether to add a newline at end of a TiddlyWiki file.
+
+A value of `never' (the default) sets it to nil locally:
+never add a newline if the file does not already have one.
+
+A value of nil keeps the buffer-local value of the parent mode
+(`text-mode', which in turn takes from `mode-require-final-newline').
+
+A value of `global' takes it from `require-final-newline'.
+
+Other values have the same meaning as in `require-final-newline',
+but are set locally."
+  :type (tiddlywiki--require-final-newline-type)
+  :group 'tiddlywiki)
+
 (defvar tiddlywiki-current-wiki nil
   "The currently selected wiki name.")
 
@@ -571,6 +604,20 @@ and navigation functions for multi-wiki setups.
   ;; Paragraphs
   (setq-local paragraph-start "\f\\|[ \t]*$\\|[ \t]*[*#;:]")
   (setq-local paragraph-separate "[ \t\f]*$")
+
+  ;; Final newline: `never' (the default) installs nil locally;
+  ;; nil does nothing, so we take the value `text-mode' installs
+  ;; from `mode-require-final-newline'; `global' removes it so the
+  ;; user's global `require-final-newline' applies; any other value
+  ;; is installed buffer-locally.
+  (when tiddlywiki-require-final-newline
+    (cond
+     ((eq tiddlywiki-require-final-newline 'global)
+      (kill-local-variable 'require-final-newline))
+     ((eq tiddlywiki-require-final-newline 'never)
+      (setq-local require-final-newline nil))
+     (t
+      (setq-local require-final-newline tiddlywiki-require-final-newline))))
 
   ;; Update modified timestamp on save
   (add-hook 'before-save-hook #'tiddlywiki-update-modified nil t)
